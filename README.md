@@ -4,6 +4,6 @@
 
 
 
-![](/src/assets/logo2x.png)
+![](/src/assets/logo@2x.png)
 
 Made by [Julio Azevedo](https://github.com/julioaze) :rocket:
