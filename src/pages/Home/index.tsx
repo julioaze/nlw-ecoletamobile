@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { 
   View, 
   ImageBackground, 
@@ -9,15 +9,46 @@ import {
   KeyboardAvoidingView, 
   Platform 
 } from 'react-native';
+import axios from 'axios';
 import { RectButton } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import RNPickerSelect from "react-native-picker-select";
+
+interface IBGEUFResponse {
+  sigla: string;
+}
+
+interface IBGECityResponse {
+  nome: string;
+}
 
 const Home = () => {
+  const [ufs, setUfs] = useState<string[]>([]);
+  const [selectedUf, setSelectedUf] = useState("0");
   const [state, setState] = useState('');
   const [city, setCity] = useState('');
 
   const navigation = useNavigation();
+
+
+  useEffect(() => {
+    axios
+      .get<IBGEUFResponse[]>(
+        "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
+      )
+      .then((response) => {
+        const ufInitials = response.data.map((uf) => uf.sigla);
+
+        setUfs(ufInitials);
+      });
+  }, []);
+
+  function handleSelectUf(event: ChangeEvent<HTMLSelectElement>) {
+    const uf = event.target.value;
+
+    setSelectedUf(uf);
+  }
 
   function handleNavigateToPoints() {
     navigation.navigate('Points', {
@@ -50,6 +81,17 @@ const Home = () => {
         </View>
 
         <View style={styles.footer}>
+          <RNPickerSelect
+            style={pickerSelectStyles}
+            onValueChange={(value) => console.log(value)}
+            items={[
+              { label: "Football", value: "football" },
+              { label: "Baseball", value: "baseball" },
+              { label: "Hockey", value: "hockey" },
+            ]}
+            useNativeAndroidPickerStyle={false}
+          />
+
           <TextInput
             style={styles.input}
             placeholder="Digite a UF"
@@ -147,6 +189,29 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontFamily: "Roboto_500Medium",
     fontSize: 16,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: "purple",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 30, // to ensure the text is never behind the icon
   },
 });
 
